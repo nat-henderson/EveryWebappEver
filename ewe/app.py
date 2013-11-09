@@ -1,5 +1,6 @@
 import random
 import string
+import argparse
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -11,7 +12,12 @@ from utilities import *
 
 app = Flask(__name__)
 
-appengine = create_engine('sqlite:////tmp/app.db', echo=True)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Create the database specified from the config.')
+    parser.add_argument('--uri', default='sqlite:////tmp/app.db', type=str, help="the uri for the database.  ex 'sqllite:///:memory:'")
+    options = parser.parse_args()
+
+appengine = create_engine(options.uri, echo=True)
 Session = sessionmaker(bind=appengine)
 session = Session()
 
@@ -38,7 +44,9 @@ class %s(Base):
 """ % (new_table_id, table.name)
         all_vars = globals().update(locals())
         exec(code_to_generate_this_table) in all_vars
-        names_to_orm_classes[name] = locals()[new_table_id]
+        new_table = locals()[new_table_id]
+        names_to_orm_classes[name] = new_table
+
     return names_to_orm_classes[name]
 
 @app.route('/<tablename>/<int:id>', methods=['GET'])
@@ -67,8 +75,8 @@ def modify_obj(tablename,id):
         setattr(obj,key,f[key])
     session.add(obj)
     session.commit()
-    ## note: if user submits invalid fields 
-    ## they'll still be in the response 
+    ## note: if user submits invalid fields
+    ## they'll still be in the response
     ## despite not having been added to the database
     return jsonify_sql_obj(obj)
 
