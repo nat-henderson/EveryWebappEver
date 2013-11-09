@@ -22,8 +22,13 @@ Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
-Base.metadata.create_all(engine) 
+Base.metadata.create_all(engine)
 ed_user = User('ed', 'Ed Jones', 'edspassword')
 session.add(ed_user)
+session.commit()
 
+from app import get_or_create_orm_object
+obj = get_or_create_orm_object('users', engine, Base)
+from utilities import jsonify_sql_obj
+print jsonify_sql_obj(session.query(obj).filter_by(id=1).one())
 #print jsonify_sql_obj(ed_user)
