@@ -9,9 +9,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.types import *
 
-def get_config_file_metadata(filename):
-    config = json.load(open(filename))
-    metadata = MetaData()
+def get_config_file_metadata(configfile, engine):
+    config = json.load(configfile)
+    metadata = MetaData(bind=engine)
     Session = sessionmaker(bind=configengine)
     def create_column(column_dict, curr_table):
         type_dict = {
@@ -51,8 +51,7 @@ def get_config_file_metadata(filename):
         session.commit()
         Table(table['tablename'], metadata,
                 Column('id', Integer, primary_key=True),
-                *[create_column(column, curr_table) for column in table['columns']],
-                extend_existing = True)
+                *[create_column(column, curr_table) for column in table['columns']])
 
     return metadata
 
@@ -63,8 +62,8 @@ if __name__ == '__main__':
     parser.add_argument('ConfigFile', type=str, help="the filename to read the config from")
     parser.add_argument('--update', action="store_true", help="If set, updates schema instead of overwriting.  Usually this means issuing ALTER TABLE commands instead of DROP TABLE / CREATE TABLE, but that might be different depending on your backend.")
     options = parser.parse_args()
-    metadata = get_config_file_metadata(options.ConfigFile)
     engine = create_engine(options.SQLAlchemyURI)
+    metadata = get_config_file_metadata(open(options.ConfigFile), engine)
     metadata.bind = engine
     if not options.update:
         metadata.drop_all()

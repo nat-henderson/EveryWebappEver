@@ -1,6 +1,8 @@
 import random
 import string
 import argparse
+import StringIO
+import json
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -10,6 +12,7 @@ from flask import Flask, request
 
 from utilities import *
 from configmodels import configengine, DBReference
+from config import get_config_file_metadata
 
 app = Flask(__name__)
 
@@ -116,6 +119,30 @@ def delete_obj(tablename,id):
     session.delete(obj)
     session.commit()
     return "Object deleted.",204
+
+@app.route('/createtable/<tablename>', methods = ['POST'])
+def create_table(tablename):
+    try:
+        # this will raise exception if DNE
+        get_or_create_orm_object(tablename)
+        return "Table already exists", 412
+    except Exception as e:
+        print e
+        pass
+    columns = request.form.to_dict()
+    json_dict = {"tablename" : tablename, "columns" : []}
+    def make_fake_column(colname, coltype):
+        if coltype.startswith("ForeignKey"):
+            return {"name":colname, "type":"ForeignKey", "table":coltype[len("ForeignKey_"):], "backref":tablename}
+        else:
+            return {"name":colname, "type":coltype}
+
+    for colname, coltype in columns.items():
+        json_dict["columns"].append(make_fake_column(colname, coltype))
+
+    new_table_metadata = get_config_file_metadata(StringIO.StringIO(json.dumps([json_dict])), appengine)
+    new_table_metadata.create_all()
+    return "Table created."
 
 if __name__ == '__main__':
    app.run(debug=True)
