@@ -1,5 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
+from flask import Flask
+
+app = Flask(__name__)
 
 appengine = create_engine('sqlite:////tmp/app.db', echo=True)
 
@@ -28,3 +31,5 @@ class %s(Base):
         names_to_orm_classes[name] = locals()[new_table_id]
     return names_to_orm_classes[name]
 
+if __name__ == '__main__':
+    app.run()
