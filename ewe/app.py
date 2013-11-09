@@ -1,10 +1,13 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from flask import Flask
+from utilities import *
 
 app = Flask(__name__)
 
 appengine = create_engine('sqlite:////tmp/app.db', echo=True)
+Session = sessionmaker(bind=appengine)
+session = Session()
 
 names_to_orm_classes = {}
 
@@ -30,6 +33,11 @@ class %s(Base):
         exec(code_to_generate_this_table)
         names_to_orm_classes[name] = locals()[new_table_id]
     return names_to_orm_classes[name]
+
+@app.route('/<str:tablename>/<int:ID>', methods=['GET'])
+def get_obj_from_table(tablename, ID):
+   obj = session.query(tablename).filter_by(id=ID).first()
+   return jsonify_sql_obj(obj)
 
 if __name__ == '__main__':
     app.run()
