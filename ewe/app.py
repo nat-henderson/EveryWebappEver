@@ -4,8 +4,8 @@ import argparse
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from sqlalchemy.schema import MetaData, Table
+from sqlalchemy import create_engine,String,Integer
+from sqlalchemy.schema import MetaData, Table, Column
 from flask import Flask, request
 
 from utilities import *
