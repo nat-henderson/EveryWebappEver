@@ -46,7 +46,7 @@ def get_obj_from_table(tablename, id):
     table = get_or_create_orm_object(tablename, appengine, Base)
     obj = session.query(table).filter_by(id=id).first()
     if not obj:
-        return "User does not exist.",400
+        return "Object does not exist.",400
     return jsonify_sql_obj(obj)
 
 @app.route('/<tablename>/<int:id>', methods=['POST'])
@@ -55,15 +55,34 @@ def modify_obj(tablename,id):
     obj = session.query(table).filter_by(id=id).first()
     f = request.form
     if not obj:
-        return "User does not exist.",400
+        return "Object does not exist.",400
     for key in f.keys():
         setattr(obj,key,f[key])
     session.add(obj)
     session.commit()
-    ## note: if users submits invalid fields they'll 
-    ## still be in the response 
+    ## note: if user submits invalid fields 
+    ## they'll still be in the response 
     ## despite not having been added to the database
     return jsonify_sql_obj(obj)
 
+@app.route('/<tablename>',methods=['POST'])
+def create_obj(tablename):
+    orm_obj = get_or_create_orm_object(tablename, appengine, Base)
+    obj_args = request.form.to_dict()
+    obj = orm_obj(**obj_args)
+    session.add(obj)
+    session.commit()
+    return jsonify_sql_obj(obj)
+
+@app.route('/<tablename>/<int:id>', methods=['DELETE'])
+def delete_obj(tablename,id):
+    table = get_or_create_orm_object(tablename, appengine, Base)
+    obj = session.query(table).filter_by(id=id).first()
+    if not obj:
+        return "Object does not exist.",400
+    session.delete(obj)
+    session.commit()
+    return "Object deleted.",204
+
 if __name__ == '__main__':
-    app.run()
+   app.run()
