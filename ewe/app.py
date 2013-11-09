@@ -2,6 +2,7 @@ import random
 import string
 
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.schema import MetaData, Table
 from flask import Flask
@@ -16,7 +17,7 @@ session = Session()
 
 names_to_orm_classes = {}
 
-Base = declarative_base(bind=engine)
+Base = declarative_base(bind=appengine)
 
 class NoSuchTableException(ValueError): pass
 
