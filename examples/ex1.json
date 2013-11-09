@@ -1,4 +1,4 @@
-[{"tablename":"people",
+[{"tablename":"users",
     "columns":
         [{"name":"name",
           "type":"string"},
@@ -13,8 +13,8 @@
           "type":"string"},
          {"name":"default",
           "type":"bool"},
-         {"name":"person",
+         {"name":"user",
           "type":"ForeignKey",
-          "backref":"people",
-          "table":"people.id"}]
+          "backref":"emails",
+          "table":"users.id"}]
  }]

@@ -8,8 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine,String,Integer
 from sqlalchemy.schema import MetaData, Table, Column
-from flask import Flask, request, render_template
-from flask.ext.security import login_required
+from flask import Flask, request
 
 from utilities import *
 from configmodels import configengine, DBReference
