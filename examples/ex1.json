@@ -1,9 +1,9 @@
 [{"tablename":"users",
     "columns":
         [{"name":"name",
-          "type":"String"},
+          "type":"string"},
          {"name":"fullname",
-          "type":"String"},
+          "type":"string"},
          {"name":"password",
-          "type":"String"}]
+          "type":"string"}]
 }]

@@ -1,11 +1,13 @@
 import argparse
+import json
 
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.types import *
 
-def get_config_file_base(filename):
-    config = json.load(filename)
+def get_config_file_metadata(filename):
+    config = json.load(open(filename))
     metadata = MetaData()
     def create_column(column_dict):
         type_dict = {
@@ -27,8 +29,8 @@ def get_config_file_base(filename):
 
     for table in config:
         Table(table['tablename'], metadata,
-                Column('id', Integer, primary_key=True,
-                *[create_column(column) for column in table['columns']]),
+                Column('id', Integer, primary_key=True),
+                *[create_column(column) for column in table['columns']],
                 extend_existing = True)
 
     return metadata
@@ -38,10 +40,10 @@ if __name__ == '__main__':
     parser.add_argument('SQLAlchemyURI', type=str, help="the uri for the database.  ex 'sqllite:///:memory:'")
     parser.add_argument('ConfigFile', type=str, help="the filename to read the config from")
     parser.add_argument('--update', action="store_true", help="If set, updates schema instead of overwriting.")
-    parser.parse_args()
-    metadata = get_config_file_metadata(parser.ConfigFile)
-    engine = create_engine(parser.SQLAlchemyURI)
+    options = parser.parse_args()
+    metadata = get_config_file_metadata(options.ConfigFile)
+    engine = create_engine(options.SQLAlchemyURI)
     metadata.bind = engine
-    if not parser.update:
+    if not options.update:
         metadata.drop_all()
     metadata.create_all()
