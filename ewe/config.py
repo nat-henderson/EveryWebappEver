@@ -9,21 +9,21 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.types import *
 
+column_type_dict = {
+    'int' : Integer,
+    'str' : String(255),
+    'string' : String(255),
+    'bool' : Boolean,
+    'date' : Date,
+    'datetime' : DateTime,
+    'float' : Float,
+    'time' : Time}
+
 def get_config_file_metadata(configfile, engine):
     config = json.load(configfile)
     metadata = MetaData(bind=engine)
     Session = sessionmaker(bind=configengine)
     def create_column(column_dict, curr_table):
-        type_dict = {
-                'int' : Integer,
-                'str' : String(255),
-                'string' : String(255),
-                'bool' : Boolean,
-                'date' : Date,
-                'datetime' : DateTime,
-                'float' : Float,
-                'time' : Time}
-
         colname = column_dict['name']
         if column_dict['type'] == 'ForeignKey':
             coltype = ForeignKey(column_dict['table'])
@@ -40,7 +40,7 @@ def get_config_file_metadata(configfile, engine):
                 session.add(ref)
                 session.commit()
         else:
-            coltype = type_dict[column_dict['type']]
+            coltype = column_type_dict[column_dict['type']]
         return Column(colname, coltype)
 
     for table in config:
