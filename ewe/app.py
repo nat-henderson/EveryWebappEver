@@ -49,6 +49,13 @@ def get_obj_from_table(tablename, id):
         return "Object does not exist.",400
     return jsonify_sql_obj(obj)
 
+@app.route('/<tablename>/<int:id>/<attrName>', methods=['GET'])
+def get_obj_attr(tablename,id,attrName):
+    table = get_or_create_orm_object(tablename, appengine, Base)
+    obj = session.query(table).filter_by(id=id).first()
+    ret = getattr(obj,attrName)
+    return (json.dumps({attrName:ret}))
+
 @app.route('/<tablename>/<int:id>', methods=['POST'])
 def modify_obj(tablename,id):
     table = get_or_create_orm_object(tablename, appengine, Base)
@@ -85,4 +92,4 @@ def delete_obj(tablename,id):
     return "Object deleted.",204
 
 if __name__ == '__main__':
-   app.run()
+   app.run(debug=True)
