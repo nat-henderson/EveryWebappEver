@@ -16,7 +16,7 @@ class User(Base):
         self.fullname = fullname
         self.password = password
 
-engine = create_engine('sqlite:///:memory:', echo=True)
+engine = create_engine('sqlite:////tmp/app.db', echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -25,7 +25,5 @@ ed_user = User('ed', 'Ed Jones', 'edspassword')
 session.add(ed_user)
 session.commit()
 
-from app import get_or_create_orm_object
-obj = get_or_create_orm_object('users', engine, Base)
-from utilities import jsonify_sql_obj
-print jsonify_sql_obj(session.query(obj).filter_by(id=1).one())
+from app import *
+app.run(debug=True)

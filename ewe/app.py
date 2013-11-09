@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.schema import MetaData, Table
-from flask import Flask
+from flask import Flask, request
 
 from utilities import *
 
@@ -43,8 +43,27 @@ class %s(Base):
 
 @app.route('/<tablename>/<int:id>', methods=['GET'])
 def get_obj_from_table(tablename, id):
-   obj = session.query(tablename).filter_by(id=id).first()
-   return jsonify_sql_obj(obj)
+    table = get_or_create_orm_object(tablename, appengine, Base)
+    obj = session.query(table).filter_by(id=id).first()
+    if not obj:
+        return "User does not exist.",400
+    return jsonify_sql_obj(obj)
+
+@app.route('/<tablename>/<int:id>', methods=['POST'])
+def modify_obj(tablename,id):
+    table = get_or_create_orm_object(tablename, appengine, Base)
+    obj = session.query(table).filter_by(id=id).first()
+    f = request.form
+    if not obj:
+        return "User does not exist.",400
+    for key in f.keys():
+        setattr(obj,key,f[key])
+    session.add(obj)
+    session.commit()
+    ## note: if users submits invalid fields they'll 
+    ## still be in the response 
+    ## despite not having been added to the database
+    return jsonify_sql_obj(obj)
 
 if __name__ == '__main__':
     app.run()
