@@ -41,9 +41,9 @@ class %s(Base):
         names_to_orm_classes[name] = locals()[new_table_id]
     return names_to_orm_classes[name]
 
-@app.route('/<str:tablename>/<int:ID>', methods=['GET'])
-def get_obj_from_table(tablename, ID):
-   obj = session.query(tablename).filter_by(id=ID).first()
+@app.route('/<tablename>/<int:id>', methods=['GET'])
+def get_obj_from_table(tablename, id):
+   obj = session.query(tablename).filter_by(id=id).first()
    return jsonify_sql_obj(obj)
 
 if __name__ == '__main__':
