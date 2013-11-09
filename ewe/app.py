@@ -8,7 +8,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine,String,Integer
 from sqlalchemy.schema import MetaData, Table, Column
-from flask import Flask, request
+from flask import Flask, request, render_template
+from flask.ext.security import login_required
 
 from utilities import *
 from configmodels import configengine, DBReference
@@ -55,6 +56,16 @@ class %s(Base):
         names_to_orm_classes[name] = new_table
 
     return names_to_orm_classes[name]
+
+@app.route('/<tablename>/lookup/<attrname>/<value>', methods=['GET'])
+def get_obj_list_by_attr(tablename, attrname, value):
+    table = get_or_create_orm_object(tablename, appengine, Base)
+    if not hasattr(table,attrname):
+        return "This table does not have a column of that name.",412
+    attr = getattr(table,attrname)
+    obj_list=session.query(table).filter(attr==value).all() 
+    print obj_list
+    return jsonify_sql_obj(obj_list)
 
 @app.route('/<tablename>/<int:id>', methods=['GET'])
 def get_obj_from_table(tablename, id):
