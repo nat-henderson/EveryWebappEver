@@ -33,7 +33,9 @@ def get_config_file_metadata(filename):
                 fkey_to_attribute = column_dict['table'].split('.')[1]
                 fkey_name = colname
                 from_name = column_dict['backref']
-                ref = DBReference(from_table, from_name, to_table_id, fkey_name, fkey_to_attribute)
+                ref = DBReference(from_table = from_table, from_name = from_name,
+                        to_table_id = to_table_id, fkey_name = fkey_name,
+                        fkey_to_attribute = fkey_to_attribute)
                 session = Session()
                 session.add(ref)
                 session.commit()
@@ -42,7 +44,8 @@ def get_config_file_metadata(filename):
         return Column(colname, coltype)
 
     for table in config:
-        curr_table = DBTable(table['tablename'], table.get('dbname') or table['tablename'])
+        curr_table = DBTable(name = table['tablename'],
+                database_table = table.get('dbname') or table['tablename'])
         session = Session()
         session.add(curr_table)
         session.commit()
