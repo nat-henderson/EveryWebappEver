@@ -13,7 +13,7 @@ from flask.ext.security import login_required
 
 from utilities import *
 from configmodels import configengine, DBReference
-from config import get_config_file_metadata
+from config import get_config_file_metadata, column_type_dict
 
 app = Flask(__name__)
 
@@ -31,9 +31,9 @@ configsession = ConfigSession()
 
 names_to_orm_classes = {}
 
-Base = declarative_base(bind=appengine)
-
 class NoSuchTableException(ValueError): pass
+
+Base = declarative_base(bind=appengine)
 
 def get_or_create_orm_object(name, appengine = appengine, Base = Base):
     if name not in names_to_orm_classes:
@@ -42,12 +42,14 @@ def get_or_create_orm_object(name, appengine = appengine, Base = Base):
         if name not in meta.tables:
             raise NoSuchTableException("no %s in %s" % (name, meta.tables.keys()))
         table = meta.tables[name]
+        print table.columns
         def random_id():
             return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10))
         new_table_id = table.name + random_id()
+        NewBase = declarative_base(bind=appengine)
         code_to_generate_this_table = """
-class %s(Base):
-    __table__ = Table(%r, Base.metadata, autoload=True)
+class %s(NewBase):
+    __table__ = Table(%r, NewBase.metadata, autoload=True)
 
 """ % (new_table_id, table.name)
         all_vars = globals().update(locals())
@@ -137,10 +139,13 @@ def create_table(tablename):
         # this will raise exception if DNE
         get_or_create_orm_object(tablename)
         return "Table already exists", 412
-    except Exception as e:
-        print e
+    except NoSuchTableException as e:
         pass
     columns = request.form.to_dict()
+    create_table_from_columns(tablename, columns)
+    return "Table created."
+
+def create_table_from_columns(tablename, columns):
     json_dict = {"tablename" : tablename, "columns" : []}
     def make_fake_column(colname, coltype):
         if coltype.startswith("ForeignKey"):
@@ -153,7 +158,36 @@ def create_table(tablename):
 
     new_table_metadata = get_config_file_metadata(StringIO.StringIO(json.dumps([json_dict])), appengine)
     new_table_metadata.create_all()
-    return "Table created."
+
+@app.route('/altertable/<tablename>', methods = ["POST"])
+def alter_table(tablename):
+    try:
+        orm_obj = get_or_create_orm_object(tablename)
+        print orm_obj
+    except NoSuchTableException as e:
+        return "Table does not exist", 412
+    table = orm_obj.__table__
+
+    def add_column(engine, table, column):
+        table_name = table.description
+        column_name = column.compile(dialect=engine.dialect)
+        column_type = column.type.compile(engine.dialect)
+        engine.execute('ALTER TABLE %s ADD COLUMN %s %s' % (table_name, column_name, column_type))
+
+    def add_fk(engine, table, column):
+        add_column(engine, table, column)
+        column_name = column.compile(dialect=engine.dialect)
+        column_type = column.type.compile(engine.dialect)
+
+    for colname, coltype in request.form.items():
+        add_column(appengine, table, Column(colname, column_type_dict[coltype]))
+
+    del names_to_orm_classes[tablename]
+
+    orm_obj = get_or_create_orm_object(tablename)
+
+    return "Table Modified"
+
 
 if __name__ == '__main__':
    app.run(debug=True)
