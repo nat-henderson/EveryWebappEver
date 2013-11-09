@@ -1,9 +1,10 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 
-engine = create_engine('sqlite:////tmp/config.db', echo=True)
+configengine = create_engine('sqlite:////tmp/config.db', echo=True)
 
 Base = declarative_base(bind=engine)
 
 class DBTable(Base):
-    pass
+    name = Column(String(255))
+    database_table = Column(String(255))
