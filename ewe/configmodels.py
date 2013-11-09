@@ -11,13 +11,14 @@ class DBTable(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(255))
     database_table = Column(String(255))
-    references = relationship("DBReference", backref = "from_table")
+    references = relationship("DBReference", backref = "to_table")
 
 class DBReference(Base):
     __tablename__ = 'dbbackrefs'
 
     id = Column(Integer, primary_key = True)
-    to_table = Column(String(255))
-    to_field = Column(String(255))
-    from_field = Column(String(255))
-    from_table_id = Column(Integer, ForeignKey('dbtables.id'))
+    from_table = Column(String(255))
+    from_name = Column(String(255))
+    to_table_id = Column(Integer, ForeignKey('dbtables.id'))
+    fkey_name = Column(String(255))
+    fkey_to_attribute = Column(String(255))

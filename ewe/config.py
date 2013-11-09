@@ -28,11 +28,12 @@ def get_config_file_metadata(filename, curr_table):
         if column_dict['type'] == 'ForeignKey':
             coltype = ForeignKey(column_dict['table'])
             if 'backref' in column_dict:
-                to_table = column_dict['table'].split('.')[0]
-                to_field = column_dict['table'].split('.')[1]
-                from_table_id = curr_table.id
-                from_field = column_dict['backref']
-                ref = DBReference(to_table, to_field, from_field, from_table_id)
+                to_table_id = curr_table.id
+                from_table = column_dict['table'].split('.')[0]
+                fkey_to_attribute = column_dict['table'].split('.')[1]
+                fkey_name = colname
+                from_name = column_dict['backref']
+                ref = DBReference(from_table, from_name, to_table_id, fkey_name, fkey_to_attribute)
                 session = Session()
                 session.add(ref)
                 session.commit()

@@ -18,15 +18,5 @@ class AlchemyEncoder(json.JSONEncoder):
 
         return json.JSONEncoder.default(self, obj)
 
-def jsonify_sql_obj(className):
-    return json.dumps(className, cls=AlchemyEncoder)
-
-def plural(word):
-    if word.endswith('y'):
-        return word[:-1] + 'ies'
-    elif word[-1] in 'sx' or word[-2:] in ['sh', 'ch']:
-        return word + 'es'
-    elif word.endswith('an'):
-        return word[:-2] + 'en'
-    else:
-        return word + 's'
+def jsonify_sql_obj(sqlalch_obj):
+    return json.dumps(sqlalch_obj, cls=AlchemyEncoder)

@@ -61,12 +61,24 @@ def get_obj_from_table(tablename, id):
         return "Object does not exist.",400
     return jsonify_sql_obj(obj)
 
-@app.route('/<tablename>/<int:id>/<attrName>', methods=['GET'])
-def get_obj_attr(tablename,id,attrName):
+@app.route('/<tablename>/<int:id>/<attrname>', methods=['GET'])
+def get_obj_attr(tablename,id,attrname):
     table = get_or_create_orm_object(tablename, appengine, Base)
     obj = session.query(table).filter_by(id=id).first()
-    ret = getattr(obj,attrName)
-    return (json.dumps({attrName:ret}))
+    if hasattr(obj, attrname):
+        ret = getattr(obj,attrname)
+        return json.dumps({attrname:ret})
+    c_session = ConfigSession()
+    dbref = c_session.query(DBReference).filter_by(from_name = attrname, from_table = tablename).first()
+    c_session.close()
+    if not dbref:
+        return "Attribute does not exist", 400
+    table_to_search = dbref.to_table.database_table
+    table_obj = get_or_create_orm_object(table_to_search, appengine, Base)
+    session = Session()
+    linked_objs = session.query(table_obj).filter_by(**{dbref.fkey_name: getattr(obj, dbref.fkey_to_attribute)}).all()
+    return jsonify_sql_obj(linked_objs)
+
 
 @app.route('/<tablename>/<int:id>', methods=['POST'])
 def modify_obj(tablename,id):
