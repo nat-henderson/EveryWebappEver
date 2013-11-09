@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 
 configengine = create_engine('sqlite:////tmp/config.db', echo=True)
 
-Base = declarative_base(bind=engine)
+Base = declarative_base(bind=configengine)
 
 class DBTable(Base):
     name = Column(String(255))
