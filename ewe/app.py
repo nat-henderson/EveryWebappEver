@@ -9,7 +9,7 @@ from sqlalchemy.schema import MetaData, Table
 from flask import Flask, request
 
 from utilities import *
-from configmodels import configengine
+from configmodels import configengine, DBReference
 
 app = Flask(__name__)
 
@@ -63,6 +63,7 @@ def get_obj_from_table(tablename, id):
 
 @app.route('/<tablename>/<int:id>/<attrname>', methods=['GET'])
 def get_obj_attr(tablename,id,attrname):
+    session = Session() #I wish we didn't need this
     table = get_or_create_orm_object(tablename, appengine, Base)
     obj = session.query(table).filter_by(id=id).first()
     if hasattr(obj, attrname):

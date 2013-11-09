@@ -9,11 +9,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.types import *
 
-def get_config_file_metadata(filename, curr_table):
+def get_config_file_metadata(filename):
     config = json.load(open(filename))
     metadata = MetaData()
     Session = sessionmaker(bind=configengine)
-    def create_column(column_dict):
+    def create_column(column_dict, curr_table):
         type_dict = {
                 'int' : Integer,
                 'str' : String(255),

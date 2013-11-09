@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine,ForeignKey,Column,Integer,String
+from sqlalchemy.orm import relationship
 
 configengine = create_engine('sqlite:////tmp/config.db', echo=True)
 

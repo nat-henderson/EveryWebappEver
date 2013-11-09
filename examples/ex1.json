@@ -15,5 +15,6 @@
           "type":"bool"},
          {"name":"user",
           "type":"ForeignKey",
+          "backref":"emails",
           "table":"users.id"}]
  }]
