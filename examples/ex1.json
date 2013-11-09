@@ -1,0 +1,9 @@
+[{"tablename":"users",
+    "columns":
+        [{"name":"name",
+          "type":"String"},
+         {"name":"fullname",
+          "type":"String"},
+         {"name":"password",
+          "type":"String"}]
+}]
