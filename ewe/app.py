@@ -1,6 +1,11 @@
+import random
+import string
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
+from sqlalchemy.schema import MetaData, Table
 from flask import Flask
+
 from utilities import *
 
 app = Flask(__name__)
@@ -15,7 +20,7 @@ Base = declarative_base(bind=engine)
 
 class NoSuchTableException(ValueError): pass
 
-def get_or_create_orm_object(name):
+def get_or_create_orm_object(name, appengine = None, Base = None):
     if name not in names_to_orm_classes:
         meta = MetaData()
         meta.reflect(bind=appengine)
@@ -30,7 +35,8 @@ class %s(Base):
     __table__ = Table(%r, Base.metadata, autoload=True)
 
 """ % (new_table_id, table.name)
-        exec(code_to_generate_this_table)
+        all_vars = globals().update(locals())
+        exec(code_to_generate_this_table) in all_vars
         names_to_orm_classes[name] = locals()[new_table_id]
     return names_to_orm_classes[name]
 
