@@ -6,4 +6,14 @@
           "type":"string"},
          {"name":"password",
           "type":"string"}]
-}]
+ },
+ {"tablename":"emails",
+    "columns":
+        [{"name":"address",
+          "type":"string"},
+         {"name":"default",
+          "type":"bool"},
+         {"name":"user",
+          "type":"ForeignKey",
+          "table":"users.id"}]
+ }]

@@ -4,7 +4,7 @@ import json
 from configmodels import Base, DBTable, DBReference, configengine
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.types import *
