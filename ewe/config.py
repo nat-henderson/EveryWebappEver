@@ -45,7 +45,13 @@ def get_config_file_metadata(configfile, engine):
 
     for table in config:
         curr_table = DBTable(name = table['tablename'],
-                database_table = table.get('dbname') or table['tablename'])
+                database_table = table.get('dbname') or table['tablename'],
+                is_user = table.get('is_user', False))
+        if table.get('is_user'):
+            if not any(column['name'] == 'username' for column in table['columns']):
+                table['columns'].append[{'name':'username', 'type':'str'}]
+            if not any(column['name'] == 'password' for column in table['columns']):
+                table['columns'].append[{'name':'password', 'type':'str'}]
         session = Session()
         session.add(curr_table)
         session.commit()
@@ -56,6 +62,7 @@ def get_config_file_metadata(configfile, engine):
     return metadata
 
 if __name__ == '__main__':
+    Base.metadata.drop_all()
     Base.metadata.create_all()
     parser = argparse.ArgumentParser(description='Create the database specified from the config.')
     parser.add_argument('SQLAlchemyURI', type=str, help="the uri for the database.  ex 'sqllite:///:memory:'")

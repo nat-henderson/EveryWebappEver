@@ -65,9 +65,63 @@ def get_obj_list_by_attr(tablename, attrname, value):
     if not hasattr(table,attrname):
         return "This table does not have a column of that name.",412
     attr = getattr(table,attrname)
-    obj_list=session.query(table).filter(attr==value).all() 
+    obj_list=session.query(table).filter(attr==value).all()
     print obj_list
     return jsonify_sql_obj(obj_list)
+
+def get_user_orm():
+    c_session = ConfigSession()
+    user_tablename = c_session.query(DBTable).filter_by(is_user = True).first()
+    if not user_tablename:
+        return "No one ever defined a user table!", 400
+    return get_or_create_orm_object(user_tablename.name)
+
+class UserWrapper(object):
+    def __init__(self, orm_object):
+        self.user_orm_object = orm_object
+
+    def is_authenticated(self):
+        return self.user_orm_object is not None
+
+    def is_anonymous(self):
+        return self.user_orm_object is None
+
+    def get_id(self):
+        return unicode(self.user_orm_object.id) if self.user_orm_object is not None else None
+
+def load_user(userid):
+    user_orm = get_user_orm()
+    session = Session()
+    user = session.query(user_orm).filter_by(id == int(userid)).first()
+    return UserWrapper(user)
+
+@app.route('/login', methods = ['POST'])
+def login_post():
+    user_orm = get_user_orm()
+    post_dict['password'] = hashlib.sha256(post_dict['password']).hexdigest()
+    session = Session()
+    user = session.query(user_orm)\
+            .filter_by(username = post_dict['username'])\
+            .filter_by(password = post_dict['password'])\
+            .first()
+    if user:
+        login_user(UserWrapper(user))
+
+@app.route('/register', methods = ['POST'])
+def register_post():
+    user_orm = get_user_orm()
+    post_dict = request.form.to_dict()
+    post_dict['password'] = hashlib.sha256(post_dict['password']).hexdigest()
+    user = user_orm(**post_dict)
+    session = Session()
+    session.add(user)
+    session.commit()
+    return jsonify_sql_obj(user)
+
+@app.route('/logout', methods = ['GET'])
+def logout():
+    logout_user()
+    return redirect('/login')
 
 @app.route('/<tablename>/<int:id>', methods=['GET'])
 def get_obj_from_table(tablename, id):

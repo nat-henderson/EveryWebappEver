@@ -20,3 +20,4 @@ class AlchemyEncoder(json.JSONEncoder):
 
 def jsonify_sql_obj(sqlalch_obj):
     return json.dumps(sqlalch_obj, cls=AlchemyEncoder)
+
