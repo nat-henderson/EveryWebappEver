@@ -27,7 +27,7 @@ Base = declarative_base(bind=appengine)
 
 class NoSuchTableException(ValueError): pass
 
-def get_or_create_orm_object(name, appengine = None, Base = None):
+def get_or_create_orm_object(name, appengine = appengine, Base = Base):
     if name not in names_to_orm_classes:
         meta = MetaData()
         meta.reflect(bind=appengine)
