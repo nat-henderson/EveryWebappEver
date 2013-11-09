@@ -9,6 +9,7 @@ from sqlalchemy.schema import MetaData, Table
 from flask import Flask, request
 
 from utilities import *
+from configmodels import configengine
 
 app = Flask(__name__)
 
@@ -20,6 +21,9 @@ if __name__ == '__main__':
 appengine = create_engine(options.uri, echo=True)
 Session = sessionmaker(bind=appengine)
 session = Session()
+
+ConfigSession = sessionmaker(bind=configengine)
+configsession = ConfigSession()
 
 names_to_orm_classes = {}
 
