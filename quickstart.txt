@@ -1,0 +1,13 @@
+EWE setup has a couple steps:
+
+1. 'pip -r requirements.txt' to install the necessary software
+    (sqlalchemy and flask)
+2. Define your config as a JSON file
+    See examples/ex1.json for the format.
+    Basically, list the tables and columns the database
+    will need and what type of object goes in each entry.
+3. Generate the database:
+    'python config.py 'sqlite:////tmp/app.db' ../examples/ex1.json'
+    This puts the databse at /tmp/app.db and uses the json 
+    model at ../examples/ex1.json, but you can change these.
+4. 
