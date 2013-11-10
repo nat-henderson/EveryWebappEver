@@ -10,4 +10,48 @@ EWE setup has a couple steps:
     'python config.py 'sqlite:////tmp/app.db' ../examples/ex1.json'
     This puts the databse at /tmp/app.db and uses the json 
     model at ../examples/ex1.json, but you can change these.
-4. 
+4. Run the app:
+    'python app.py'
+    The app is running at localhost:5000.
+
+Now you can use any of the pre-defined endpoints. 
+All return values are JSON.
+Examples are in curl following the tables defined in ex1.json.
+These are:
+POST /<table>
+    Adds an item to this table.
+    curl -d name=bob -d fullname=bobsmith -d password=password localhost:5000/users
+    Returns the created item.
+
+GET /<table>/<id>
+    Returns the item in this table with the given ID.
+    curl localhost:5000/users/1
+     
+GET /<table>/lookup/<attrname>/<value>
+    Returns a list of items with the given value for the given attribute.
+    curl localhost:5000/users/lookup/name/bob
+
+GET /<table>/<id>/<attrname>
+    Returns the value of this attribute.
+    For ForeignKey backreferences, returns a list of all such items with a foreignkey to this item.
+    curl localhost:5000/users/1/emails       //foreignkey
+    curl curl localhost:5000/users/1/name    //String attribute
+
+POST /<table>/<id>
+    Updates the item with the given ID according to the new fields and values in the request.
+    Ignored invalid attributes.
+    Returns the modified item.
+    curl -d name=newname -d password=newpass localhost:5000/users
+
+DELETE /<table>/<id>
+    Deletes the item with the given ID.
+    Returns HTTP 204.
+
+POST /createtable/<newtablename>
+    Creates a new table from the columns specified in the request.
+    curl -d col1=str col2=bool col3=ForeignKey_user.id localhost:5000/createtable/newtablename
+
+POST /altertable/<table>
+    Alters the table according to the request data.
+
+    
